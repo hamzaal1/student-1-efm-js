@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <style>
+        .vert {
+            color: greenyellow;
+        }
+
+        .rouge {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <form action="">
+        <fieldset>Nouvelle ligne</fieldset>
+        <table border="2">
+            <tbody>
+                <tr>
+                    <td>ID:</td>
+                    <td> <input type="text" id="id"> <button onclick="getData()" type="button" id="lire">lire</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Nom:</td>
+                    <td> <input type="text" id="nom" placeholder="nom de stg"></td>
+                </tr>
+                <tr>
+                    <td>Filier:</td>
+                    <td>
+                        TDI : <input type="radio" value="tdi" name="filier" id="">
+                        TDM : <input type="radio" value="tdm" name="filier" id="">
+                        TRI : <input type="radio" value="tri" name="filier" id="">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Note:</td>
+                    <td>
+                        <input type="text" id="note">
+                    </td>
+                </tr>
+                <tr>
+                    <td> <button type="button" id="ajoute" onclick="Ajoute()">Ajoute</button> </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+
+    <table width="50%" border="3">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>NOM</th>
+                <th>Note</th>
+                <th>Filier</th>
+                <th>Gestion</th>
+            </tr>
+        </thead>
+        <tbody id="list_stg">
+            <tr>
+                <td>1</td>
+                <td>Alami Hicham</td>
+                <td class="rouge">1</td>
+                <td>TDI</td>
+                <td> <button onclick="supprime(event)"> Supprime </button> </td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr>
+                <td colspan="2">Best Note </td>
+                <td id="best_note"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        actualiseBestNote();
+        function Valide() {
+            let valide = true;
+            let ID = document.querySelector('#id');
+            let nom = document.querySelector('#nom');
+            let note = document.querySelector('#note');
+            let filier = document.querySelectorAll("[name='filier']");
+
+            if (ID.value.trim() === '') {
+                valide = false;
+            }
+            if (nom.value.trim() === '') {
+                valide = false;
+            }
+            if (note.value.trim() === '') {
+                valide = false;
+            }
+
+            let isChecked = false;
+            for (let i = 0; i < filier.length; i++) {
+                if (filier[i].checked) {
+                    isChecked = true;
+                    break;
+                }
+            }
+
+            if (!isChecked) {
+                valide = false;
+            }
+
+            return valide;
+        }
+        function supprime(event) {
+            let button = event.target;
+            let row = button.closest('tr');
+            if (confirm('are you sure ?')) {
+                row.remove();
+                actualiseBestNote();
+            }
+        }
+
+        function actualiseBestNote() {
+            let notes = document.querySelectorAll('#list_stg tr td:nth-child(3)');
+            let bestNote = document.getElementById('best_note');
+
+            let maxNote = Math.max(...Array.from(notes).map(note => parseFloat(note.textContent)));
+            bestNote.textContent = maxNote;
+        }
+
+
+        function getData() {
+            // Find the table row that matches the provided id
+            let id = document.querySelector('#id').value
+            let rows = document.querySelectorAll('#list_stg tr');
+            let foundedRow = null
+            for (let i = 0; i < rows.length; i++) {
+                let row = rows[i];
+                let firstCell = row.cells[0];
+                if (firstCell.textContent.trim() === id) {
+                    foundedRow = row;
+                    break;
+                }
+            }
+            // Retrieve the data from the row
+            let rowData = {
+                nom: foundedRow.cells[1].textContent,
+                note: foundedRow.cells[2].textContent,
+                filier: foundedRow.cells[3].textContent
+            };
+
+
+            document.querySelector('#nom').value = rowData.nom;
+            document.querySelector('#note').value = rowData.note;
+            let filiers = document.querySelectorAll("[name='filier']");
+            for (let i = 0; i < filiers.length; i++) {
+                if (filiers[i].value === rowData.filier.toLowerCase()) {
+                    filiers[i].checked = true;
+                    break;
+                }
+            }
+
+        }
+
+
+
+        function Ajoute() {
+            let test = Valide();
+            if (test) {
+                let valide = true;
+                let ID = document.querySelector('#id');
+                let nom = document.querySelector('#nom');
+                let note = document.querySelector('#note');
+                let filier = document.querySelector("[name='filier']:checked");
+
+                let list_stg = document.querySelector('#list_stg');
+
+                // Create a new <tr> element
+                let newRow = document.createElement('tr');
+                //nowRow.addAttribute('width',"50%")
+                // Create the HTML content for the new row
+                newRow.innerHTML = `
+                <td>${ID.value}</td>
+                <td>${nom.value}</td>
+                <td class="${parseFloat(note.value) >= 10 ? 'vert' : 'rouge'}" >${note.value}</td>
+                <td>${filier.value}</td>
+                <td>
+                  <button onclick="supprime(event)">Supprime</button>
+                </td>
+              `;
+                // Append the new row to the table
+                list_stg.appendChild(newRow);
+                actualiseBestNote();
+            } else {
+                console.log('error');
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>
